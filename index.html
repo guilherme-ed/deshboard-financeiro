@@ -9,12 +9,12 @@
 </head>
 <body>
     
-    <header class="cabecallho">
+    <header class="cabecalho">
         <h1>Menu Financeiro</h1>
         <p>Controle suas finanças com inteligência. </p>
     </header>
 
-    <main class="dashboard">
+    <main class="dshboard">
         <section class="resumo">
             <article class="card">
                 <h2>Saldo atual</h2>
@@ -23,12 +23,12 @@
 
             <article class="card">
                 <h2>Receitas</h2>
-                <p id="saldo">R$:0,00</p>
+                <p id="receitas">R$:0,00</p>
             </article>
 
             <article class="card">
                 <h2>Despesas</h2>
-                <p id="saldo">R$:0,00</p>
+                <p id="despesas">R$:0,00</p>
             </article>
         </section>
 
@@ -55,11 +55,30 @@
                 >
 
                 <label for="tipo">Tipo de lançamento</label>
-                <select id="tipo required">
+                <select id="tipo" required>
                     <option value="receita">Receita</option>
                     <option value="despesa">Despesa</option>
                 </select>
                 
+                <label for="categoria">Categoria</label>
+                <select id="categoria" required>
+                    <option value="alimentacao">Alimentação</option>
+                    <option value="transporte">Transporte</option>
+                    <option value="moradia">Moradia</option>
+                    <option value="saude">Saúde</option>
+                    <option value="lazer">Lazer</option>
+                    <option value="educacao">Educação</option>
+                    <option value="salario">Salário</option>
+                    <option value="outros">Outros</option>
+                </select>
+
+                <label for="data">Data do lançamento</label>
+                <input
+                    type="date"
+                    id="data"
+                    required
+                >
+
                 <button type="submit">Adcionar lançamento</button>
             </form>
         </section>

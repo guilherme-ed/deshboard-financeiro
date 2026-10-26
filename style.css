@@ -34,7 +34,7 @@ body {
     color: var(--texto-secundario);
 }
 
-.deshboard {
+.dashboard {
     max-width: 1100px;
     margin: auto;
 }
@@ -67,12 +67,12 @@ body {
     overflow-wrap: anywhere;
 }
 
-.transacoes,
+.transacao,
 .historico {
     margin-bottom: 24px;
 }
 
-.transacoes h2,
+.transacao h2,
 .historico h2 {
     margin-bottom: 20px;
 }
