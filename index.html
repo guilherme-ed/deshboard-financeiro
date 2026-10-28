@@ -3,95 +3,208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Deshboard Financeiro</title>
+    <title>Meu Dashboard Financeiro</title>
     <link rel="stylesheet" href="style.css">
-    <script src="script.js" defer></script>
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    >
+    <!-- Chart.js precisa vir antes do script.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.js"></script>
+    <script defer src="script.js"></script>
 </head>
 <body>
-    
-    <header class="cabecalho">
-        <h1>Menu Financeiro</h1>
-        <p>Controle suas finanças com inteligência. </p>
-    </header>
 
-    <main class="dshboard">
-        <section class="resumo">
-            <article class="card">
-                <h2>Saldo atual</h2>
-                <p id="saldo">R$:0,00</p>
-            </article>
+<div class="layout">
 
-            <article class="card">
-                <h2>Receitas</h2>
-                <p id="receitas">R$:0,00</p>
-            </article>
+    <!-- Barra lateral -->
+    <aside class="sidebar">
+        <a href="#inicio" class="logo">
+            <i class="fa-solid fa-wallet"></i>
+            <span>Meu Financeiro</span>
+        </a>
 
-            <article class="card">
-                <h2>Despesas</h2>
-                <p id="despesas">R$:0,00</p>
-            </article>
-        </section>
+        <nav class="menu">
+            <a href="#inicio" class="menu-link ativo">
+                <i class="fa-solid fa-house"></i>
+                <span>Visão geral</span>
+            </a>
 
-        <section class="transacao">
-            <h2>Adicionar lançamento</h2>
+            <a href="#resumo" class="menu-link">
+                <i class="fa-solid fa-chart-pie"></i>
+                <span>Resumo financeiro</span>
+            </a>
 
-            <form id="form-transacao">
-                <label for="descricao">Descrição</label>
-                <input
-                    type="text"
-                    id="descricao"
-                    placeholder="Ex.: Conta de luz"
-                    required
-                >
+            <a href="#formulario" class="menu-link">
+                <i class="fa-solid fa-circle-plus"></i>
+                <span>Novo lançamento</span>
+            </a>
 
-                <label for="valor">Valor (R$)</label>
-                <input
-                    type="number"
-                    id="valor"
-                    min="0.01"
-                    step="0.01"
-                    placeholder="Ex.: 150,00"
-                    required
-                >
+            <a href="#historico" class="menu-link">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>Histórico</span>
+            </a>
+        </nav>
 
-                <label for="tipo">Tipo de lançamento</label>
-                <select id="tipo" required>
-                    <option value="receita">Receita</option>
-                    <option value="despesa">Despesa</option>
-                </select>
-                
-                <label for="categoria">Categoria</label>
-                <select id="categoria" required>
-                    <option value="alimentacao">Alimentação</option>
-                    <option value="transporte">Transporte</option>
-                    <option value="moradia">Moradia</option>
-                    <option value="saude">Saúde</option>
-                    <option value="lazer">Lazer</option>
-                    <option value="educacao">Educação</option>
-                    <option value="salario">Salário</option>
-                    <option value="outros">Outros</option>
-                </select>
+        <div class="sidebar-rodape">
+            <i class="fa-solid fa-shield-halved"></i>
+            <span>Controle suas finanças</span>
+        </div>
+    </aside>
 
-                <label for="data">Data do lançamento</label>
-                <input
-                    type="date"
-                    id="data"
-                    required
-                >
+    <!-- Conteúdo -->
+    <div class="conteudo">
 
-                <button type="submit">Adcionar lançamento</button>
-            </form>
-        </section>
+        <header class="cabecalho" id="inicio">
+            <h1>Visão geral</h1>
+            <p>Acompanhe sua vida financeira em um só lugar.</p>
+        </header>
 
-        <section class="historico">
-            <h2>Últimos lançamentos</h2>
+        <main class="dashboard">
 
-            <ul id="lista-transacoes">
-                <li>Nenhum lançamento cadastrado.</li>
-            </ul>
-        </section>
+            <!-- Resumo (3 cartões) -->
+            <section class="resumo" id="resumo">
 
-    </main>
-    
+                <article class="card card-saldo">
+                    <div class="card-topo">
+                        <h2>Saldo atual</h2>
+                        <span class="icone icone-saldo">
+                            <i class="fa-solid fa-wallet"></i>
+                        </span>
+                    </div>
+                    <p id="saldo">R$ 0,00</p>
+                    <small>Seu saldo disponível</small>
+                </article>
+
+                <article class="card card-receitas">
+                    <div class="card-topo">
+                        <h2>Receitas</h2>
+                        <span class="icone icone-receita">
+                            <i class="fa-solid fa-arrow-trend-up"></i>
+                        </span>
+                    </div>
+                    <p id="receitas">R$ 0,00</p>
+                    <small>Entradas financeiras</small>
+                </article>
+
+                <article class="card card-despesas">
+                    <div class="card-topo">
+                        <h2>Despesas</h2>
+                        <span class="icone icone-despesa">
+                            <i class="fa-solid fa-arrow-trend-down"></i>
+                        </span>
+                    </div>
+                    <p id="despesas">R$ 0,00</p>
+                    <small>Saídas financeiras</small>
+                </article>
+
+            </section>
+
+            <!-- Gráficos (fora do grid do resumo) -->
+            <section class="graficos" id="graficos">
+
+                <div class="grafico-card">
+                    <div class="grafico-cabecalho">
+                        <div>
+                            <h2>Receitas x Despesas</h2>
+                            <p>Comparativo financeiro</p>
+                        </div>
+                        <i class="fa-solid fa-chart-column"></i>
+                    </div>
+
+                    <div class="grafico-area">
+                        <canvas id="graficoComparativo"></canvas>
+                    </div>
+                </div>
+
+                <div class="grafico-card">
+                    <div class="grafico-cabecalho">
+                        <div>
+                            <h2>Despesas por categoria</h2>
+                            <p>Distribuição dos seus gastos</p>
+                        </div>
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+
+                    <div class="grafico-area">
+                        <canvas id="graficoCategorias"></canvas>
+                    </div>
+                </div>
+
+            </section>
+
+            <!-- Formulário -->
+            <section class="transacoes" id="formulario">
+                <h2>Adicionar lançamento</h2>
+
+                <form id="form-transacao">
+
+                    <div class="campo campo-largo">
+                        <label for="descricao">Descrição</label>
+                        <input
+                            type="text"
+                            id="descricao"
+                            placeholder="Ex.: Conta de luz"
+                            required
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="valor">Valor (R$)</label>
+                        <input
+                            type="text"
+                            id="valor"
+                            inputmode="decimal"
+                            placeholder="Ex.: 1.500,00"
+                            required
+                        >
+                    </div>
+
+                    <div class="campo">
+                        <label for="tipo">Tipo de lançamento</label>
+                        <select id="tipo" required>
+                            <option value="receita">Receita</option>
+                            <option value="despesa">Despesa</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="categoria">Categoria</label>
+                        <select id="categoria" required>
+                            <option value="alimentacao">Alimentação</option>
+                            <option value="transporte">Transporte</option>
+                            <option value="moradia">Moradia</option>
+                            <option value="saude">Saúde</option>
+                            <option value="lazer">Lazer</option>
+                            <option value="educacao">Educação</option>
+                            <option value="salario">Salário</option>
+                            <option value="outros">Outros</option>
+                        </select>
+                    </div>
+
+                    <div class="campo">
+                        <label for="data">Data do lançamento</label>
+                        <input type="date" id="data" required>
+                    </div>
+
+                    <button type="submit">Adicionar lançamento</button>
+
+                </form>
+            </section>
+
+            <!-- Histórico -->
+            <section class="historico" id="historico">
+                <h2>Últimos lançamentos</h2>
+
+                <ul id="lista-transacoes">
+                    <li>Nenhum lançamento cadastrado.</li>
+                </ul>
+            </section>
+
+        </main>
+    </div>
+
+</div>
+
 </body>
 </html>

@@ -1,4 +1,8 @@
 
+/* ==========================
+   ELEMENTOS DA PÁGINA
+========================== */
+
 const form = document.getElementById("form-transacao");
 const campoDescricao = document.getElementById("descricao");
 const campoValor = document.getElementById("valor");
@@ -11,6 +15,36 @@ const receitasElemento = document.getElementById("receitas");
 const despesasElemento = document.getElementById("despesas");
 const listaTransacoes = document.getElementById("lista-transacoes");
 
+const nomesCategorias = {
+    alimentacao: "Alimentação",
+    transporte: "Transporte",
+    moradia: "Moradia",
+    saude: "Saúde",
+    lazer: "Lazer",
+    educacao: "Educação",
+    salario: "Salário",
+    outros: "Outros"
+};
+
+const coresCategorias = [
+    "#2563eb",
+    "#16a34a",
+    "#f59e0b",
+    "#dc2626",
+    "#8b5cf6",
+    "#0891b2",
+    "#ec4899",
+    "#64748b"
+];
+
+// Instâncias dos gráficos (declaradas antes de qualquer chamada)
+let graficoComparativo = null;
+let graficoCategorias = null;
+
+/* ==========================
+   FUNÇÕES AUXILIARES
+========================== */
+
 // Retorna a data de hoje no formato AAAA-MM-DD
 function obterDataLocal() {
     const hoje = new Date();
@@ -21,36 +55,13 @@ function obterDataLocal() {
     return `${ano}-${mes}-${dia}`;
 }
 
-campoData.value = obterDataLocal();
-
-// Recupera os lançamentos salvos no navegador
-let transacoes = [];
-
-try {
-    const dadosSalvos = JSON.parse(
-        localStorage.getItem("transacoes-financeiras") || "[]"
-    );
-
-    if (Array.isArray(dadosSalvos)) {
-        transacoes = dadosSalvos.filter((item) =>
-            item &&
-            typeof item.id === "string" &&
-            typeof item.descricao === "string" &&
-            Number.isFinite(item.valor) &&
-            item.valor > 0 &&
-            ["receita", "despesa"].includes(item.tipo)
-        );
-    }
-} catch (erro) {
-    console.error("Não foi possível recuperar os lançamentos.", erro);
+// Formata os valores em reais
+function formatarMoeda(valor) {
+    return valor.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL"
+    });
 }
-
-// Completa categoria e data nos lançamentos antigos
-transacoes = transacoes.map((item) => ({
-    ...item,
-    categoria: item.categoria || "outros",
-    data: item.data || obterDataLocal()
-}));
 
 // Aceita qualquer formato: 1500 | 1.500 | 1500,50 | 1.500,50 | 1500.50 | R$ 1.500,00
 function converterValor(texto) {
@@ -88,15 +99,38 @@ function converterValor(texto) {
     return Number(limpo);
 }
 
-// Formata os valores em reais
-function formatarMoeda(valor) {
-    return valor.toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL"
-    });
+/* ==========================
+   DADOS (LOCALSTORAGE)
+========================== */
+
+let transacoes = [];
+
+try {
+    const dadosSalvos = JSON.parse(
+        localStorage.getItem("transacoes-financeiras") || "[]"
+    );
+
+    if (Array.isArray(dadosSalvos)) {
+        transacoes = dadosSalvos.filter((item) =>
+            item &&
+            typeof item.id === "string" &&
+            typeof item.descricao === "string" &&
+            Number.isFinite(item.valor) &&
+            item.valor > 0 &&
+            ["receita", "despesa"].includes(item.tipo)
+        );
+    }
+} catch (erro) {
+    console.error("Não foi possível recuperar os lançamentos.", erro);
 }
 
-// Salva os lançamentos no navegador
+// Completa categoria e data nos lançamentos antigos
+transacoes = transacoes.map((item) => ({
+    ...item,
+    categoria: item.categoria || "outros",
+    data: item.data || obterDataLocal()
+}));
+
 function salvarTransacoes() {
     try {
         localStorage.setItem(
@@ -109,16 +143,19 @@ function salvarTransacoes() {
     }
 }
 
-// Atualiza os cartões de resumo
+function somarPorTipo(tipo) {
+    return transacoes
+        .filter((item) => item.tipo === tipo)
+        .reduce((total, item) => total + item.valor, 0);
+}
+
+/* ==========================
+   RESUMO
+========================== */
+
 function atualizarResumo() {
-    const receitas = transacoes
-        .filter((item) => item.tipo === "receita")
-        .reduce((total, item) => total + item.valor, 0);
-
-    const despesas = transacoes
-        .filter((item) => item.tipo === "despesa")
-        .reduce((total, item) => total + item.valor, 0);
-
+    const receitas = somarPorTipo("receita");
+    const despesas = somarPorTipo("despesa");
     const saldo = receitas - despesas;
 
     saldoElemento.textContent = formatarMoeda(saldo);
@@ -132,18 +169,145 @@ function atualizarResumo() {
     despesasElemento.style.color = "var(--despesa)";
 }
 
-const nomesCategorias = {
-    alimentacao: "Alimentação",
-    transporte: "Transporte",
-    moradia: "Moradia",
-    saude: "Saúde",
-    lazer: "Lazer",
-    educacao: "Educação",
-    salario: "Salário",
-    outros: "Outros"
-};
+/* ==========================
+   GRÁFICOS
+========================== */
 
-// Mostra os lançamentos na tela
+function atualizarGraficos() {
+    if (typeof Chart === "undefined") {
+        console.warn("Chart.js não foi carregado. Os gráficos não serão exibidos.");
+        return;
+    }
+
+    const receitas = somarPorTipo("receita");
+    const despesas = somarPorTipo("despesa");
+
+    // Gráfico 1: Receitas x Despesas
+    const canvasComparativo = document.getElementById("graficoComparativo");
+
+    if (canvasComparativo) {
+        if (!graficoComparativo) {
+            graficoComparativo = new Chart(canvasComparativo, {
+                type: "bar",
+                data: {
+                    labels: ["Receitas", "Despesas"],
+                    datasets: [{
+                        label: "Valor em reais",
+                        data: [receitas, despesas],
+                        backgroundColor: ["#16a34a", "#dc2626"],
+                        borderRadius: 8,
+                        maxBarThickness: 70
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: (contexto) => formatarMoeda(contexto.raw)
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (valor) => formatarMoeda(valor)
+                            },
+                            grid: { color: "#e2e8f0" }
+                        },
+                        x: {
+                            grid: { display: false }
+                        }
+                    }
+                }
+            });
+        } else {
+            graficoComparativo.data.datasets[0].data = [receitas, despesas];
+            graficoComparativo.update();
+        }
+    }
+
+    // Gráfico 2: Despesas por categoria
+    const canvasCategorias = document.getElementById("graficoCategorias");
+
+    if (canvasCategorias) {
+        const totais = {};
+
+        transacoes
+            .filter((item) => item.tipo === "despesa")
+            .forEach((item) => {
+                const categoria = item.categoria || "outros";
+                totais[categoria] = (totais[categoria] || 0) + item.valor;
+            });
+
+        const categorias = Object.keys(totais);
+        const temDespesas = categorias.length > 0;
+
+        // Sem despesas: mostra um anel cinza em vez de um gráfico vazio
+        const rotulos = temDespesas
+            ? categorias.map((c) => nomesCategorias[c] || "Outros")
+            : ["Sem despesas"];
+
+        const valores = temDespesas
+            ? categorias.map((c) => totais[c])
+            : [1];
+
+        const cores = temDespesas
+            ? categorias.map((_, i) => coresCategorias[i % coresCategorias.length])
+            : ["#e2e8f0"];
+
+        if (!graficoCategorias) {
+            graficoCategorias = new Chart(canvasCategorias, {
+                type: "doughnut",
+                data: {
+                    labels: rotulos,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: cores,
+                        borderWidth: 3,
+                        borderColor: "#ffffff",
+                        hoverOffset: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: "65%",
+                    plugins: {
+                        legend: {
+                            position: "bottom",
+                            labels: {
+                                usePointStyle: true,
+                                padding: 18
+                            }
+                        },
+                        tooltip: {
+                            enabled: temDespesas,
+                            callbacks: {
+                                label: (contexto) =>
+                                    `${contexto.label}: ${formatarMoeda(contexto.raw)}`
+                            }
+                        }
+                    }
+                }
+            });
+        } else {
+            graficoCategorias.data.labels = rotulos;
+            graficoCategorias.data.datasets[0].data = valores;
+            graficoCategorias.data.datasets[0].backgroundColor = cores;
+            graficoCategorias.options.plugins.tooltip.enabled = temDespesas;
+            graficoCategorias.update();
+        }
+    }
+}
+
+/* ==========================
+   HISTÓRICO
+========================== */
+
 function mostrarTransacoes() {
     listaTransacoes.replaceChildren();
 
@@ -154,8 +318,12 @@ function mostrarTransacoes() {
         return;
     }
 
-    // Mostra os lançamentos mais recentes primeiro
-    [...transacoes].reverse().forEach((transacao) => {
+    // Mais recentes primeiro: ordena pela data e, em empate, pelo último cadastrado
+    const ordenadas = [...transacoes]
+        .reverse()
+        .sort((a, b) => b.data.localeCompare(a.data));
+
+    ordenadas.forEach((transacao) => {
         const item = document.createElement("li");
         const informacoes = document.createElement("div");
         const detalhes = document.createElement("div");
@@ -224,13 +392,20 @@ function mostrarTransacoes() {
     });
 }
 
-// Atualiza todas as informações do dashboard
+/* ==========================
+   DASHBOARD (ATUALIZA TUDO)
+========================== */
+
 function atualizarDashboard() {
     atualizarResumo();
+    atualizarGraficos();
     mostrarTransacoes();
 }
 
-// Cadastra uma receita ou despesa
+/* ==========================
+   FORMULÁRIO
+========================== */
+
 form.addEventListener("submit", (evento) => {
     evento.preventDefault();
 
@@ -255,16 +430,14 @@ form.addEventListener("submit", (evento) => {
         return;
     }
 
-    const novaTransacao = {
+    transacoes.push({
         id: crypto.randomUUID(),
         descricao: descricao,
         valor: Math.round(valor * 100) / 100,
         tipo: tipo,
         categoria: campoCategoria.value,
         data: campoData.value || obterDataLocal()
-    };
-
-    transacoes.push(novaTransacao);
+    });
 
     salvarTransacoes();
     atualizarDashboard();
@@ -274,5 +447,66 @@ form.addEventListener("submit", (evento) => {
     campoDescricao.focus();
 });
 
-// Inicializa o dashboard
+/* ==========================
+   MENU LATERAL
+========================== */
+
+const linksMenu = document.querySelectorAll(".menu-link");
+
+const secoesMenu = [
+    document.getElementById("inicio"),
+    document.getElementById("resumo"),
+    document.getElementById("formulario"),
+    document.getElementById("historico")
+].filter(Boolean);
+
+function marcarLinkAtivo(idSecao) {
+    linksMenu.forEach((link) => {
+        link.classList.toggle(
+            "ativo",
+            link.getAttribute("href") === `#${idSecao}`
+        );
+    });
+}
+
+// Destaca o link clicado
+linksMenu.forEach((link) => {
+    link.addEventListener("click", () => {
+        marcarLinkAtivo(link.getAttribute("href").slice(1));
+    });
+});
+
+// Atualiza o destaque conforme a seção visível
+if ("IntersectionObserver" in window) {
+    const observador = new IntersectionObserver((entradas) => {
+        const visiveis = entradas
+            .filter((entrada) => entrada.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio);
+
+        if (visiveis.length > 0) {
+            marcarLinkAtivo(visiveis[0].target.id);
+        }
+    }, {
+        rootMargin: "-10% 0px -60% 0px",
+        threshold: [0, 0.25, 0.5, 0.75, 1]
+    });
+
+    secoesMenu.forEach((secao) => observador.observe(secao));
+}
+
+// No fim da página, marca "Histórico" (a última seção nem sempre chega ao topo)
+window.addEventListener("scroll", () => {
+    const fimDaPagina =
+        window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+
+    if (fimDaPagina) {
+        marcarLinkAtivo("historico");
+    }
+}, { passive: true });
+
+/* ==========================
+   INICIALIZAÇÃO
+========================== */
+
+campoData.value = obterDataLocal();
 atualizarDashboard();
