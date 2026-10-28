@@ -1,11 +1,19 @@
+
+/* ==========================
+   1. CONFIGURAÇÕES GERAIS
+========================== */
+
 :root {
     --fundo: #f1f5f9;
     --card: #ffffff;
-    --texto: #1e293b;
+    --texto: #172033;
     --texto-secundario: #64748b;
     --destaque: #2563eb;
+    --destaque-hover: #1d4ed8;
     --receita: #16a34a;
     --despesa: #dc2626;
+    --borda: #e2e8f0;
+    --sombra: 0 4px 20px rgba(15, 23, 42, 0.05);
 }
 
 * {
@@ -15,113 +23,243 @@
 }
 
 body {
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: var(--fundo);
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: var(--fundo);
     color: var(--texto);
-    padding: 24px;
+    padding: 32px;
+    line-height: 1.5;
 }
 
+/* ==========================
+   2. CABEÇALHO
+========================== */
+
 .cabecalho {
-    max-width: 1100px;
-    margin: 0 auto 28px;
+    max-width: 1200px;
+    margin: 0 auto 32px;
 }
 
 .cabecalho h1 {
-    margin-bottom: 8px;
+    font-size: 30px;
+    font-weight: 750;
+    letter-spacing: -0.8px;
+    margin-bottom: 6px;
 }
 
 .cabecalho p {
     color: var(--texto-secundario);
+    font-size: 15px;
 }
 
+/* ==========================
+   3. ÁREA PRINCIPAL
+========================== */
+
 .dashboard {
-    max-width: 1100px;
-    margin: auto;
+    max-width: 1200px;
+    margin: 0 auto;
 }
+
+/* ==========================
+   4. CARTÕES DO RESUMO
+========================== */
 
 .resumo {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 20px;
-    margin-bottom: 24px;
+    gap: 22px;
+    margin-bottom: 28px;
 }
 
-.card,
-.transacoes,
-.historico {
-    background-color: var(--card);
-    padding: 24px;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px #0000000a;
+.card {
+    position: relative;
+    overflow: hidden;
+    background: var(--card);
+    padding: 26px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 18px;
+    box-shadow: var(--sombra);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.08);
 }
 
 .card h2 {
-    font-size: 16px;
     color: var(--texto-secundario);
-    margin-bottom: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 12px;
 }
 
 .card p {
-    font-size: 26px;
-    font-weight: bold;
+    font-size: clamp(22px, 2vw, 30px);
+    font-weight: 750;
+    letter-spacing: -0.6px;
     overflow-wrap: anywhere;
 }
 
-.transacao,
+/* ==========================
+   5. FORMULÁRIO
+========================== */
+
+.transacoes,
 .historico {
-    margin-bottom: 24px;
+    background: var(--card);
+    padding: 28px;
+    border: 1px solid rgba(226, 232, 240, 0.8);
+    border-radius: 18px;
+    box-shadow: var(--sombra);
+    margin-bottom: 28px;
 }
 
-.transacao h2,
+.transacoes h2,
 .historico h2 {
-    margin-bottom: 20px;
+    font-size: 21px;
+    font-weight: 700;
+    margin-bottom: 22px;
+    letter-spacing: -0.4px;
 }
 
 #form-transacao {
     display: grid;
-    gap: 10px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px 18px;
 }
 
-#form-transacao input,
-#form-transacao select,
-#form-transacao button {
-    width: 100%;
-    padding: 12px;
-    border-radius: 8px;
-    font-size: 16px;
+/* Os rótulos e campos ficam organizados em duas colunas */
+
+#form-transacao label {
+    align-self: end;
+    color: var(--texto);
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: -6px;
 }
 
 #form-transacao input,
 #form-transacao select {
+    width: 100%;
+    min-width: 0;
+    padding: 13px 14px;
     border: 1px solid #cbd5e1;
-    background-color: white;
+    border-radius: 10px;
+    background: #ffffff;
+    color: var(--texto);
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#form-transacao input:focus,
+#form-transacao select:focus {
+    border-color: var(--destaque);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
 }
 
 #form-transacao button {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin-top: 8px;
+    padding: 14px 18px;
     border: none;
-    background-color: var(--destaque);
-    color: white;
-    font-weight: bold;
+    border-radius: 10px;
+    background: var(--destaque);
+    color: #ffffff;
+    font: inherit;
+    font-size: 15px;
+    font-weight: 700;
     cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
 }
 
 #form-transacao button:hover {
-    opacity: 0.9;
+    background: var(--destaque-hover);
 }
+
+#form-transacao button:active {
+    transform: scale(0.99);
+}
+
+/* ==========================
+   6. HISTÓRICO
+========================== */
 
 #lista-transacoes {
     list-style: none;
 }
 
 #lista-transacoes li {
-    padding: 14px 0;
-    border-bottom: 1px solid #e2e8f0;
-    overflow-wrap: anywhere;
+    padding: 18px 0;
+    border-bottom: 1px solid var(--borda);
 }
 
-@media (max-width: 650px) {
+#lista-transacoes li:last-child {
+    border-bottom: none;
+}
+
+#lista-transacoes strong {
+    font-size: 15px;
+    font-weight: 650;
+}
+
+#lista-transacoes small {
+    font-size: 12px;
+}
+
+#lista-transacoes button {
+    padding: 7px 12px;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    background: #fff1f2;
+    color: #b91c1c;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+#lista-transacoes button:hover {
+    background: #ffe4e6;
+}
+
+/* ==========================
+   7. RESPONSIVIDADE
+========================== */
+
+@media (max-width: 800px) {
     body {
-        padding: 16px;
+        padding: 22px;
+    }
+
+    .resumo {
+        gap: 14px;
+    }
+
+    .card {
+        padding: 20px;
+    }
+
+    .transacoes,
+    .historico {
+        padding: 22px;
+    }
+}
+
+@media (max-width: 600px) {
+    body {
+        padding: 14px;
+    }
+
+    .cabecalho {
+        margin-bottom: 22px;
+    }
+
+    .cabecalho h1 {
+        font-size: 25px;
     }
 
     .resumo {
@@ -129,10 +267,33 @@ body {
         gap: 12px;
     }
 
-    .card,
+    .card {
+        padding: 20px;
+        border-radius: 14px;
+    }
+
+    .card p {
+        font-size: 26px;
+    }
+
     .transacoes,
     .historico {
-        padding: 18px;
+        padding: 20px;
+        border-radius: 14px;
+    }
+
+    .transacoes h2,
+    .historico h2 {
+        font-size: 19px;
+    }
+
+    #form-transacao {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    #form-transacao button {
+        grid-column: auto;
     }
 }
 
